@@ -1,0 +1,18 @@
+[project]
+name = "blog-agentic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.133.1",
+    "langchain>=1.2.10",
+    "langchain-community>=0.4.1",
+    "langchain-core>=1.2.16",
+    "langchain-groq>=1.1.2",
+    "langgraph>=1.0.9",
+    "langgraph-cli[inmem]>=0.4.12",
+    "langsmith[claude-agent-sdk]>=0.7.7",
+    "uvicorn>=0.41.0",
+    "watchdog>=6.0.0",
+]

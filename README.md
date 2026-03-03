@@ -290,3 +290,7 @@ Response:
 🔹 Translation via LLM
 
 🔹 Modular Clean Architecture
+
+
+Anjali Awasthi
+AI / Data Engineer | LangGraph | Agentic AI | Databricks |AWS

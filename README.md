@@ -1,296 +1,271 @@
-🚀 Agentic Blog Generator using LangGraph + Groq + FastAPI
 
-An AI-powered blog generation API built using LangGraph, LangChain, Groq LLM (LLaMA 3.1), and FastAPI.
+# 🚀 Agentic Blog Generator API
 
-This project demonstrates how to build an agentic workflow using StateGraph (LangGraph) to generate blog titles, content, and optionally translate the blog into multiple languages using conditional graph routing.
+> **Graph-based AI system for automated blog generation and multilingual translation using LangGraph and Groq LLM**
 
-📌 Project Overview
+---
 
-This system dynamically builds a graph-based AI workflow that:
+## 🌟 Overview
 
-Generates an SEO-friendly blog title
+Content generation systems often lack **structure, control, and extensibility** when scaling across workflows like SEO optimization and multilingual publishing.
 
-Generates detailed blog content
+This project solves that by building a **stateful, graph-driven Agentic AI system** using LangGraph that:
 
-Optionally translates the blog into:
+* Generates **SEO-optimized blog titles**
+* Produces **structured long-form content**
+* Dynamically performs **language translation via conditional routing**
+* Exposes the entire workflow through a **production-ready FastAPI service**
 
-Hindi
+👉 The result is a **modular, extensible AI pipeline** that mirrors real-world content automation systems.
 
-French
+---
 
-Returns structured blog output via REST API
+## 🧠 Tech Stack
 
-The project showcases:
+* **LangGraph** – Stateful workflow orchestration
+* **LangChain** – LLM abstractions
+* **Groq LLM (LLaMA 3.1 8B Instant)** – High-speed inference
+* **FastAPI** – API layer
+* **Pydantic** – Data validation
+* **Uvicorn** – ASGI server
+* **Python 3.10+**
 
-✅ Agentic workflow design using LangGraph
+---
 
-✅ Conditional routing in AI pipelines
+# 🏗️ Architecture
 
-✅ State management using TypedDict
+```mermaid
+flowchart TD
+    A[API Request] --> B[FastAPI Controller]
+    B --> C[Initialize LLM]
+    B --> D[Select Workflow]
 
-✅ Groq LLaMA model integration
+    D --> E1[Topic Workflow]
+    D --> E2[Language Workflow]
 
-✅ Production-ready FastAPI API structure
+    E1 --> F1[Generate Title]
+    F1 --> G1[Generate Content]
+    G1 --> Z[Return Response]
 
-🏗️ Architecture Overview
-🧠 Topic-Based Blog Generation Flow
-4
-Flow:
-START
-↓
-Title Creation
-↓
-Content Generation
-↓
-END
-🌍 Language-Based Blog Generation Flow
+    E2 --> F2[Generate Title]
+    F2 --> G2[Generate Content]
+    G2 --> H{Route Language}
+    H --> I1[Hindi Translation]
+    H --> I2[French Translation]
+    I1 --> Z
+    I2 --> Z
+```
 
-If a language is provided, a conditional routing system is triggered.
+---
 
-Flow:
-START
-↓
-Title Creation
-↓
-Content Generation
-↓
-Route Decision
-↙ ↘
-Hindi French
-↓ ↓
-END END
+# ⚙️ How It Works
 
-This demonstrates Agentic Conditional Execution using LangGraph.
+### 🔄 End-to-End Flow
 
-🛠️ Tech Stack
+1. User sends request via API
+2. FastAPI initializes:
 
-LangGraph – Stateful AI workflow orchestration
+   * Groq LLM
+   * LangGraph workflow
+3. System selects execution path:
 
-LangChain
+   * Topic-only → Basic pipeline
+   * Topic + language → Conditional pipeline
+4. Graph executes step-by-step:
 
-Groq LLM (LLaMA 3.1 8B Instant)
+   * Title generation
+   * Content generation
+   * Optional translation
+5. Returns structured blog response
 
-FastAPI
+---
 
-Pydantic
+# 📂 Project Structure
 
-Uvicorn
-
-Python 3.10+
-
-📂 Project Structure
+```bash
 .
 ├── app.py
 ├── src/
-│ ├── Graphs/
-│ │ └── graph_builder.py
-│ ├── Nodes/
-│ │ └── blog_node.py
-│ ├── States/
-│ │ └── blogstate.py
-│ └── LLMs/
-│ └── groqllm.py
+│   ├── Graphs/
+│   │   └── graph_builder.py
+│   ├── Nodes/
+│   │   └── blog_node.py
+│   ├── States/
+│   │   └── blogstate.py
+│   └── LLMs/
+│       └── groqllm.py
 ├── .env
 ├── requirements.txt
 └── README.md
-⚙️ Code Explanation & Flow
-1️⃣ app.py (FastAPI Entry Point)
+```
 
-This is the main API entry file.
+---
 
-Endpoint:
-POST /blogs
-Logic:
+# 🎯 Key Features / Use Cases
 
-Accepts JSON input:
+## ✍️ Automated Blog Generation
 
-{
-"topic": "Artificial Intelligence",
-"language": "hindi"
-}
+* Generates **SEO-friendly titles**
+* Produces **structured long-form content**
 
-Initializes:
+## 🌍 Multilingual Content Pipeline
 
-GroqLLM
+* Supports:
 
-GraphBuilder
+  * Hindi
+  * French
+* Easily extensible to more languages
 
-Dynamically selects graph:
+## 🧠 Agentic Workflow Execution
 
-If only topic → Topic Graph
+* Graph-based decision making
+* Dynamic execution paths
+* State-aware processing
 
-If topic + language → Language Graph
+## 🔄 Conditional Routing
 
-Invokes the compiled graph:
+* Automatically selects translation node
+* Demonstrates real-world AI orchestration
 
-state = graph.invoke({...})
+## ⚡ API-First Design
 
-Returns structured blog output.
+* Fully accessible via REST API
+* Easy integration into external systems
 
-2️⃣ graph_builder.py (Workflow Orchestration)
+---
 
-This file constructs the LangGraph StateGraph.
+# 🧩 Workflow Design (LangGraph)
 
-Two Graph Types:
-✅ Topic Graph
+## 🔹 Topic-Based Pipeline
 
-Used when only topic is provided.
+```mermaid
+flowchart LR
+    A[Start] --> B[Title Generation]
+    B --> C[Content Generation]
+    C --> D[End]
+```
 
-Nodes:
+---
 
-title_creation
+## 🔹 Language-Aware Pipeline
 
-content_generation
+```mermaid
+flowchart TD
+    A[Start] --> B[Title Generation]
+    B --> C[Content Generation]
+    C --> D{Language Selected}
+    D --> E[Hindi Translation]
+    D --> F[French Translation]
+    E --> G[End]
+    F --> G
+```
 
-Edges:
+---
 
-START → title_creation → content_generation → END
-✅ Language Graph
+# 🚀 Installation
 
-Used when topic + language provided.
+## 1️⃣ Clone Repository
 
-Additional Nodes:
-
-route
-
-hindi_translation
-
-french_translation
-
-Conditional Routing:
-
-self.graph.add_conditional_edges(
-"route",
-self.blog_node_obj.route_decision,
-{
-"hindi": "hindi_translation",
-"french": "french_translation"
-}
-)
-
-This demonstrates dynamic decision-based graph execution.
-
-3️⃣ blog_node.py (Business Logic Layer)
-
-This file contains all AI-powered operations.
-
-🔹 title_creation()
-
-Generates SEO-friendly title
-
-Uses Markdown formatting
-
-Returns partial state update
-
-🔹 content_generation()
-
-Generates detailed blog
-
-Preserves generated title
-
-Updates state with full blog
-
-🔹 translation()
-
-Accepts blog content
-
-Translates into selected language
-
-Maintains formatting
-
-Returns updated state
-
-🔹 route_decision()
-
-Determines which translation node to execute.
-
-if state["current_language"] == "hindi":
-return "hindi"
-
-This enables conditional branching in the graph.
-
-4️⃣ blogstate.py (State Management)
-
-Uses:
-
-TypedDict → BlogState
-Pydantic → Blog Model
-BlogState:
-class BlogState(TypedDict):
-topic: str
-blog: Blog
-current_language: str
-
-This ensures:
-
-Structured state transitions
-
-Predictable workflow execution
-
-5️⃣ groqllm.py (LLM Integration)
-
-Wraps Groq’s LLaMA 3.1 model:
-
-ChatGroq(
-model="llama-3.1-8b-instant"
-)
-
-Environment variable required:
-
-GROQ_API_KEY=your_api_key
-🚀 Installation
-1️⃣ Clone Repository
+```bash
 git clone https://github.com/awasthi-anjali/Blog-Generation-and-Translation.git
 cd agentic-blog-generator
-2️⃣ Create Virtual Environment
+```
+
+## 2️⃣ Create Virtual Environment
+
+```bash
 python -m venv venv
-source venv/bin/activate # mac
-venv\Scripts\activate # windows
-3️⃣ Install Dependencies
+source venv/bin/activate      # mac
+venv\Scripts\activate         # windows
+```
+
+## 3️⃣ Install Dependencies
+
+```bash
 pip install -r requirements.txt
-4️⃣ Setup Environment Variables
+```
 
-Create .env file:
+## 4️⃣ Setup Environment Variables
 
+Create `.env` file:
+
+```env
 GROQ_API_KEY=your_api_key
 LANGCHAIN_API_KEY=your_langsmith_key
-5️⃣ Run Server
+```
+
+---
+
+## ▶️ Run Server
+
+```bash
 python app.py
+```
 
 Server runs at:
 
+```
 http://localhost:8000
-🧪 API Usage
-Request:
+```
+
+---
+
+# 🧪 API Usage
+
+### 🔹 Request
+
+```json
 POST /blogs
-Body:
+
 {
-"topic": "Future of AI",
-"language": "french"
+  "topic": "Future of AI",
+  "language": "french"
 }
-Response:
+```
+
+---
+
+### 🔹 Response
+
+```json
 {
-"data": {
-"blog": {
-"title": "...",
-"content": "..."
+  "data": {
+    "blog": {
+      "title": "...",
+      "content": "..."
+    }
+  }
 }
-}
-}
-💡 Key Concepts Demonstrated
+```
 
-🔹 Agentic AI Workflow
+---
 
-🔹 Conditional Graph Routing
+# 📊 Why This Project Stands Out
 
-🔹 State-Based LLM Execution
+* ✔️ **Graph-based AI system design (LangGraph)**
+* ✔️ **Stateful workflow execution**
+* ✔️ **Dynamic conditional routing**
+* ✔️ **Multi-step LLM pipelines**
+* ✔️ **API-first production architecture**
+* ✔️ **Modular and scalable design**
 
-🔹 Multi-step AI Pipelines
+👉 Demonstrates strong **system design + applied AI engineering**
 
-🔹 Translation via LLM
+---
 
-🔹 Modular Clean Architecture
+# 🔮 Future Improvements
+
+* Add more language support
+* Integrate vector database for context-aware blogs
+* Add memory persistence
+* Introduce multi-agent collaboration
+* Deploy on AWS with API Gateway
+* Add streaming responses
+
+---
+
+# 📌 Resume-Ready Summary
+
+> Built a **stateful Agentic AI system using LangGraph** to automate blog generation and multilingual translation. Designed graph-based workflows with conditional routing, integrated Groq LLM for high-speed inference, and exposed the system via a production-ready FastAPI service.
 
 
-Anjali Awasthi
-AI / Data Engineer | LangGraph | Agentic AI | Databricks |AWS

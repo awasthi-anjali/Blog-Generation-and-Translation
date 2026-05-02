@@ -240,7 +240,7 @@ POST /blogs
 
 ---
 
-# 📊 Why This Project Stands Out
+# 📊 Important points abou this project
 
 * ✔️ **Graph-based AI system design (LangGraph)**
 * ✔️ **Stateful workflow execution**
@@ -249,7 +249,6 @@ POST /blogs
 * ✔️ **API-first production architecture**
 * ✔️ **Modular and scalable design**
 
-👉 Demonstrates strong **system design + applied AI engineering**
 
 ---
 
@@ -264,7 +263,7 @@ POST /blogs
 
 ---
 
-# 📌 Resume-Ready Summary
+#  Summary
 
 > Built a **stateful Agentic AI system using LangGraph** to automate blog generation and multilingual translation. Designed graph-based workflows with conditional routing, integrated Groq LLM for high-speed inference, and exposed the system via a production-ready FastAPI service.
 

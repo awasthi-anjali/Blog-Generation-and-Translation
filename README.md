@@ -1,48 +1,89 @@
-# Agentic Blog Generator (LangGraph + Groq + FastAPI)
+﻿# Agentic Blog Generator
 
-An AI-powered blog generation app built with LangGraph workflows, Groq LLM, and FastAPI.
+AI-powered blog generation and optional translation using `LangGraph`, `Groq`, and `FastAPI`.
 
-It supports:
-- Blog title + content generation from a topic
-- Optional language translation (`hindi` / `french`)
-- Swagger testing with typed request/query parameters
-- Frontend UI for generate + history + view + delete
-- SQLite persistence for generated blogs
+## Why This Project
+
+Content teams need fast, structured writing workflows that can also localize output for multiple languages.
+This project demonstrates a practical agentic pipeline that:
+
+- Generates a blog title and detailed content from a topic
+- Routes conditionally to translation nodes (Hindi/French)
+- Stores generated blogs in SQLite history
+- Exposes everything through a clean REST API + simple frontend
+
+---
+
+## Visual Overview
+
+### 1) System Architecture
+
+```mermaid
+flowchart LR
+    U[User / Frontend] --> A[FastAPI App]
+    A --> G[LangGraph Workflow]
+    G --> LLM[Groq LLM]
+    A --> DB[(SQLite: blogs.db)]
+    A --> R[API Response]
+```
+
+### 2) Execution Flow
+
+```mermaid
+flowchart TD
+    S[Start] --> T[Title Creation]
+    T --> C[Content Generation]
+    C --> Q{Language Provided?}
+    Q -- No --> E[End]
+    Q -- Yes --> R{Which Language?}
+    R -- Hindi --> H[Hindi Translation]
+    R -- French --> F[French Translation]
+    H --> E[End]
+    F --> E
+```
+
+### 3) Request-Response Sequence
+
+```mermaid
+sequenceDiagram
+    participant UI as Frontend/Client
+    participant API as FastAPI
+    participant WF as LangGraph
+    participant LLM as Groq LLM
+    participant DB as SQLite
+
+    UI->>API: POST /blogs { topic, language? }
+    API->>WF: invoke(state)
+    WF->>LLM: generate title/content
+    alt language selected
+        WF->>LLM: translate title/content
+    end
+    WF-->>API: final state
+    API->>DB: save blog_history row
+    API-->>UI: { data: { blog: ... } }
+```
 
 ---
 
 ## Features
 
-- **Topic-based generation** using LangGraph nodes
-- **Language routing** with conditional translation graph
-- **Markdown output** rendered properly in frontend
-- **Persistence** in local SQLite (`blogs.db`)
+- **Graph-based generation** with clear, extensible nodes
+- **Conditional routing** for language translation workflows
+- **Markdown rendering** in frontend output panel
 - **History management**:
-  - List recent blogs
-  - View full saved blog in UI
-  - Delete individual history entries
-
----
-
-## Architecture
-
-### 1) Topic Flow
-`START -> title_creation -> content_generation -> END`
-
-### 2) Language Flow
-`START -> title_creation -> content_generation -> route -> (hindi_translation | french_translation) -> END`
+  - View recent generated blogs
+  - Open a saved blog in UI
+  - Delete individual blog records
+- **Persistent storage** via `blogs.db` (`blog_history` table)
 
 ---
 
 ## Tech Stack
 
 - Python 3.10+
-- FastAPI
-- Pydantic
-- Uvicorn
-- LangGraph
-- LangChain
-- Groq LLM (`llama-3.1-8b-instant`)
+- FastAPI + Pydantic
+- LangGraph + LangChain
+- Groq (`llama-3.1-8b-instant`)
 - SQLite
 - HTML/CSS/JavaScript frontend
 
@@ -53,7 +94,7 @@ It supports:
 ```text
 .
 ├── app.py
-├── blogs.db                  # created automatically on first run
+├── blogs.db                      # auto-created on startup
 ├── frontend/
 │   └── index.html
 ├── src/
@@ -71,55 +112,73 @@ It supports:
 
 ---
 
-## Installation
+## Setup
 
-1. Clone repository
-2. Create virtual environment
-3. Install dependencies
-4. Add environment variables
-5. Run server
+### 1) Clone and enter project
 
 ```bash
 git clone https://github.com/awasthi-anjali/Blog-Generation-and-Translation.git
 cd agentic-blog-generator
+```
 
+### 2) Create virtual environment
+
+```bash
 python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-# source venv/bin/activate
+```
 
+- Windows (PowerShell):
+
+```bash
+venv\Scripts\activate
+```
+
+- macOS/Linux:
+
+```bash
+source venv/bin/activate
+```
+
+### 3) Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-Create `.env`:
+### 4) Configure environment variables
+
+Create `.env` in project root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key
 LANGCHAIN_API_KEY=your_langsmith_api_key
 ```
 
-Run:
+### 5) Run app
 
 ```bash
 python app.py
 ```
 
-Server:
-- App UI: `http://localhost:8000`
-- Swagger: `http://localhost:8000/docs`
+Open:
+
+- UI: `http://localhost:8000`
+- Swagger Docs: `http://localhost:8000/docs`
 
 ---
 
-## API Endpoints
+## API Reference
 
 ### `GET /`
-Serves frontend UI (`frontend/index.html`).
+
+Serves `frontend/index.html`.
 
 ### `POST /blogs`
-Generate blog from JSON body.
+
+Generate blog from request body.
 
 Request:
+
 ```json
 {
   "topic": "Future of AI",
@@ -128,326 +187,66 @@ Request:
 ```
 
 Notes:
+
 - `topic` is required
-- `language` is optional (`hindi` / `french`)
+- `language` is optional (`hindi` or `french`)
 
 ### `GET /blogs`
-Generate blog from query parameters.
+
+Generate blog using query parameters.
 
 Example:
+
 `/blogs?topic=Future%20of%20AI&language=hindi`
 
 ### `GET /blogs/history`
-Returns recent saved blogs from SQLite.
+
+Returns recent saved blogs.
 
 Query:
-- `limit` (default: `20`, min: `1`, max: `100`)
+
+- `limit` (default `20`, min `1`, max `100`)
 
 ### `DELETE /blogs/{blog_id}`
-Deletes one saved blog entry by `id`.
+
+Deletes one blog history row by id.
 
 ---
 
-## Data Persistence
+## Data Model (SQLite)
 
-Generated blogs are stored in:
-- File: `blogs.db`
-- Table: `blog_history`
+Database: `blogs.db`
+Table: `blog_history`
 
-Stored columns:
-- `id`
-- `topic`
-- `language`
-- `title`
-- `content`
-- `created_at` (UTC ISO format)
+Columns:
 
-The app initializes the table automatically on startup.
+- `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
+- `topic` (TEXT)
+- `language` (TEXT)
+- `title` (TEXT)
+- `content` (TEXT)
+- `created_at` (TEXT, UTC ISO timestamp)
 
 ---
 
 ## Frontend Behavior
 
-- **Generate Blog**: shows generated blog output section
-- **Check History**: shows history section only
-- **Hide History**: hides history section
-- **View** (history item): opens selected saved blog in main output panel
-- **Delete** (history item): removes saved blog from DB and refreshes list
+- **Generate Blog**: calls API and renders markdown output
+- **Check History**: fetches recent entries
+- **View**: loads selected saved blog into output panel
+- **Delete**: removes selected history item and refreshes list
 
 ---
 
-## Notes
+## Future Improvements
 
-- Translation node translates both **title** and **content** when language is selected.
-- Markdown from LLM output is rendered in UI.
-- SQLite DB file is local to this project folder.
-
-# 🚀 Agentic Blog Generator API
-
-> **Graph-based AI system for automated blog generation and multilingual translation using LangGraph and Groq LLM**
+- Add more translation languages
+- Add streaming token output in UI
+- Add authentication and per-user blog history
+- Add deployment profile (Docker + cloud target)
 
 ---
 
-## 🌟 Overview
+## Summary
 
-Content generation systems often lack **structure, control, and extensibility** when scaling across workflows like SEO optimization and multilingual publishing.
-
-This project solves that by building a **stateful, graph-driven Agentic AI system** using LangGraph that:
-
-* Generates **SEO-optimized blog titles**
-* Produces **structured long-form content**
-* Dynamically performs **language translation via conditional routing**
-* Exposes the entire workflow through a **production-ready FastAPI service**
-
-👉 The result is a **modular, extensible AI pipeline** that mirrors real-world content automation systems.
-
----
-
-## 🧠 Tech Stack
-
-* **LangGraph** – Stateful workflow orchestration
-* **LangChain** – LLM abstractions
-* **Groq LLM (LLaMA 3.1 8B Instant)** – High-speed inference
-* **FastAPI** – API layer
-* **Pydantic** – Data validation
-* **Uvicorn** – ASGI server
-* **Python 3.10+**
-
----
-
-# 🏗️ Architecture
-
-```mermaid
-flowchart TD
-    A[API Request] --> B[FastAPI Controller]
-    B --> C[Initialize LLM]
-    B --> D[Select Workflow]
-
-    D --> E1[Topic Workflow]
-    D --> E2[Language Workflow]
-
-    E1 --> F1[Generate Title]
-    F1 --> G1[Generate Content]
-    G1 --> Z[Return Response]
-
-    E2 --> F2[Generate Title]
-    F2 --> G2[Generate Content]
-    G2 --> H{Route Language}
-    H --> I1[Hindi Translation]
-    H --> I2[French Translation]
-    I1 --> Z
-    I2 --> Z
-```
-
----
-
-# ⚙️ How It Works
-
-### 🔄 End-to-End Flow
-
-1. User sends request via API
-2. FastAPI initializes:
-
-   * Groq LLM
-   * LangGraph workflow
-3. System selects execution path:
-
-   * Topic-only → Basic pipeline
-   * Topic + language → Conditional pipeline
-4. Graph executes step-by-step:
-
-   * Title generation
-   * Content generation
-   * Optional translation
-5. Returns structured blog response
-
----
-
-# 📂 Project Structure
-
-```bash
-.
-├── app.py
-├── src/
-│   ├── Graphs/
-│   │   └── graph_builder.py
-│   ├── Nodes/
-│   │   └── blog_node.py
-│   ├── States/
-│   │   └── blogstate.py
-│   └── LLMs/
-│       └── groqllm.py
-├── .env
-├── requirements.txt
-└── README.md
-```
-
----
-
-# 🎯 Key Features / Use Cases
-
-## ✍️ Automated Blog Generation
-
-* Generates **SEO-friendly titles**
-* Produces **structured long-form content**
-
-## 🌍 Multilingual Content Pipeline
-
-* Supports:
-
-  * Hindi
-  * French
-* Easily extensible to more languages
-
-## 🧠 Agentic Workflow Execution
-
-* Graph-based decision making
-* Dynamic execution paths
-* State-aware processing
-
-## 🔄 Conditional Routing
-
-* Automatically selects translation node
-* Demonstrates real-world AI orchestration
-
-## ⚡ API-First Design
-
-* Fully accessible via REST API
-* Easy integration into external systems
-
----
-
-# 🧩 Workflow Design (LangGraph)
-
-## 🔹 Topic-Based Pipeline
-
-```mermaid
-flowchart LR
-    A[Start] --> B[Title Generation]
-    B --> C[Content Generation]
-    C --> D[End]
-```
-
----
-
-## 🔹 Language-Aware Pipeline
-
-```mermaid
-flowchart TD
-    A[Start] --> B[Title Generation]
-    B --> C[Content Generation]
-    C --> D{Language Selected}
-    D --> E[Hindi Translation]
-    D --> F[French Translation]
-    E --> G[End]
-    F --> G
-```
-
----
-
-# 🚀 Installation
-
-## 1️⃣ Clone Repository
-
-```bash
-git clone https://github.com/awasthi-anjali/Blog-Generation-and-Translation.git
-cd agentic-blog-generator
-```
-
-## 2️⃣ Create Virtual Environment
-
-```bash
-python -m venv venv
-source venv/bin/activate      # mac
-venv\Scripts\activate         # windows
-```
-
-## 3️⃣ Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-## 4️⃣ Setup Environment Variables
-
-Create `.env` file:
-
-```env
-GROQ_API_KEY=your_api_key
-LANGCHAIN_API_KEY=your_langsmith_key
-```
-
----
-
-## ▶️ Run Server
-
-```bash
-python app.py
-```
-
-Server runs at:
-
-```
-http://localhost:8000
-```
-
----
-
-# 🧪 API Usage
-
-### 🔹 Request
-
-```json
-POST /blogs
-
-{
-  "topic": "Future of AI",
-  "language": "french"
-}
-```
-
----
-
-### 🔹 Response
-
-```json
-{
-  "data": {
-    "blog": {
-      "title": "...",
-      "content": "..."
-    }
-  }
-}
-```
-
----
-
-# 📊 Important points abou this project
-
-* ✔️ **Graph-based AI system design (LangGraph)**
-* ✔️ **Stateful workflow execution**
-* ✔️ **Dynamic conditional routing**
-* ✔️ **Multi-step LLM pipelines**
-* ✔️ **API-first production architecture**
-* ✔️ **Modular and scalable design**
-
-
----
-
-# 🔮 Future Improvements
-
-* Add more language support
-* Integrate vector database for context-aware blogs
-* Add memory persistence
-* Introduce multi-agent collaboration
-* Deploy on AWS with API Gateway
-* Add streaming responses
-
----
-
-#  Summary
-
-> Built a **stateful Agentic AI system using LangGraph** to automate blog generation and multilingual translation. Designed graph-based workflows with conditional routing, integrated Groq LLM for high-speed inference, and exposed the system via a production-ready FastAPI service.
-
-
+This project is a practical example of agentic AI orchestration with LangGraph: structured generation, conditional translation, API-first design, and persistent history in one workflow.

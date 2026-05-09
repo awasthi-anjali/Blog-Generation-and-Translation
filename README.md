@@ -26,12 +26,6 @@ This project demonstrates a practical agentic pipeline that:
 ### 1) System Architecture
 
 ```mermaid
-
-https://github.com/user-attachments/assets/ffa41591-ece1-44a2-8075-f557c7ce9fbc
-
-
-
-
 flowchart LR
     U[User / Frontend] --> A[FastAPI App]
     A --> G[LangGraph Workflow]

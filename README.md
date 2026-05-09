@@ -1,4 +1,11 @@
-﻿# Agentic Blog Generator
+ ## Watch Demo:
+ 
+
+https://github.com/user-attachments/assets/0b245e62-15b4-4a9b-8b94-c24e001a9434
+
+
+ 
+ # Agentic Blog Generator
 
 AI-powered blog generation and optional translation using `LangGraph`, `Groq`, and `FastAPI`.
 
@@ -19,6 +26,12 @@ This project demonstrates a practical agentic pipeline that:
 ### 1) System Architecture
 
 ```mermaid
+
+https://github.com/user-attachments/assets/ffa41591-ece1-44a2-8075-f557c7ce9fbc
+
+
+
+
 flowchart LR
     U[User / Frontend] --> A[FastAPI App]
     A --> G[LangGraph Workflow]

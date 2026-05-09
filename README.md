@@ -1,3 +1,186 @@
+# Agentic Blog Generator (LangGraph + Groq + FastAPI)
+
+An AI-powered blog generation app built with LangGraph workflows, Groq LLM, and FastAPI.
+
+It supports:
+- Blog title + content generation from a topic
+- Optional language translation (`hindi` / `french`)
+- Swagger testing with typed request/query parameters
+- Frontend UI for generate + history + view + delete
+- SQLite persistence for generated blogs
+
+---
+
+## Features
+
+- **Topic-based generation** using LangGraph nodes
+- **Language routing** with conditional translation graph
+- **Markdown output** rendered properly in frontend
+- **Persistence** in local SQLite (`blogs.db`)
+- **History management**:
+  - List recent blogs
+  - View full saved blog in UI
+  - Delete individual history entries
+
+---
+
+## Architecture
+
+### 1) Topic Flow
+`START -> title_creation -> content_generation -> END`
+
+### 2) Language Flow
+`START -> title_creation -> content_generation -> route -> (hindi_translation | french_translation) -> END`
+
+---
+
+## Tech Stack
+
+- Python 3.10+
+- FastAPI
+- Pydantic
+- Uvicorn
+- LangGraph
+- LangChain
+- Groq LLM (`llama-3.1-8b-instant`)
+- SQLite
+- HTML/CSS/JavaScript frontend
+
+---
+
+## Project Structure
+
+```text
+.
+├── app.py
+├── blogs.db                  # created automatically on first run
+├── frontend/
+│   └── index.html
+├── src/
+│   ├── Graphs/
+│   │   └── graph_builder.py
+│   ├── Nodes/
+│   │   └── blog_node.py
+│   ├── States/
+│   │   └── blogstate.py
+│   └── LLMs/
+│       └── groqllm.py
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Installation
+
+1. Clone repository
+2. Create virtual environment
+3. Install dependencies
+4. Add environment variables
+5. Run server
+
+```bash
+git clone https://github.com/awasthi-anjali/Blog-Generation-and-Translation.git
+cd agentic-blog-generator
+
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+# source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+Create `.env`:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+LANGCHAIN_API_KEY=your_langsmith_api_key
+```
+
+Run:
+
+```bash
+python app.py
+```
+
+Server:
+- App UI: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+
+---
+
+## API Endpoints
+
+### `GET /`
+Serves frontend UI (`frontend/index.html`).
+
+### `POST /blogs`
+Generate blog from JSON body.
+
+Request:
+```json
+{
+  "topic": "Future of AI",
+  "language": "french"
+}
+```
+
+Notes:
+- `topic` is required
+- `language` is optional (`hindi` / `french`)
+
+### `GET /blogs`
+Generate blog from query parameters.
+
+Example:
+`/blogs?topic=Future%20of%20AI&language=hindi`
+
+### `GET /blogs/history`
+Returns recent saved blogs from SQLite.
+
+Query:
+- `limit` (default: `20`, min: `1`, max: `100`)
+
+### `DELETE /blogs/{blog_id}`
+Deletes one saved blog entry by `id`.
+
+---
+
+## Data Persistence
+
+Generated blogs are stored in:
+- File: `blogs.db`
+- Table: `blog_history`
+
+Stored columns:
+- `id`
+- `topic`
+- `language`
+- `title`
+- `content`
+- `created_at` (UTC ISO format)
+
+The app initializes the table automatically on startup.
+
+---
+
+## Frontend Behavior
+
+- **Generate Blog**: shows generated blog output section
+- **Check History**: shows history section only
+- **Hide History**: hides history section
+- **View** (history item): opens selected saved blog in main output panel
+- **Delete** (history item): removes saved blog from DB and refreshes list
+
+---
+
+## Notes
+
+- Translation node translates both **title** and **content** when language is selected.
+- Markdown from LLM output is rendered in UI.
+- SQLite DB file is local to this project folder.
 
 # 🚀 Agentic Blog Generator API
 

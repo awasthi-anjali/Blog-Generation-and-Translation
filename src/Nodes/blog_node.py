@@ -39,31 +39,55 @@ class BlogNode:
         # -Adapt cultural refernces and idioms to be appropriate for {current_language}.
     def translation(self,state: BlogState):
         """
-        Translate the content to the specified language.
+        Translate both title and content to the specified language.
         """
-        translation_prompt="""
-        Translate the following blog content into {current_language}.
-        Only return translated blog content.
-        Do not add explanation.
+        translation_prompt = """
+        Translate the following blog title and blog content into {current_language}.
+        Rules:
+        - Return the response in exactly this format:
+          TITLE: <translated title>
+          CONTENT:
+          <translated content>
+        - Do not add introductions, notes, or explanations.
+        - Do not keep any part in English unless it is a proper noun.
+
+        ORIGINAL TITLE:
+        {blog_title}
 
         ORIGINAL CONTENT:
         {blog_content}
-
         """
-        blog_content=state["blog"]["content"]
+        blog_title = state["blog"].get("title", "")
+        blog_content = state["blog"].get("content", "")
         messages=[
-            HumanMessage(translation_prompt.format(current_language=state["current_language"],blog_content=blog_content))
+            HumanMessage(
+                translation_prompt.format(
+                    current_language=state["current_language"],
+                    blog_title=blog_title,
+                    blog_content=blog_content
+                )
+            )
         ]
-        # translation_content= self.llm.with_structured_output(Blog).invoke(messages)
-        # return translation_content
         response = self.llm.invoke(messages)
 
-        translated_text = response.content
+        translated_text = response.content if response and response.content else ""
+        translated_title = blog_title
+        translated_content = translated_text
+
+        if "CONTENT:" in translated_text:
+            parts = translated_text.split("CONTENT:", 1)
+            title_part = parts[0].replace("TITLE:", "").strip()
+            content_part = parts[1].strip()
+            if title_part:
+                translated_title = title_part
+            translated_content = content_part
+
         return {
         **state,
         "blog": {
             **state["blog"],
-            "content": translated_text
+            "title": translated_title,
+            "content": translated_content
             }
         }
 
